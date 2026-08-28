@@ -1,0 +1,152 @@
+// M1. From Parallel Arrays to a Class - Library Inventory
+class BookInventory {
+    String title;
+    String author;
+    int copiesAvailable;
+
+    public BookInventory(String title, String author, int copiesAvailable) {
+        this.title = title;
+        this.author = author;
+        this.copiesAvailable = copiesAvailable;
+    }
+
+    void printEntry() {
+        System.out.println(title + " by " + author + " - " + copiesAvailable + " copies available");
+    }
+}
+
+// M2. Encapsulated Payroll Account
+class PayrollAccount {
+    private double basicSalary;
+    private double bonus;
+
+    public PayrollAccount(double basicSalary) {
+        if (basicSalary < 0) {
+            System.out.println("Warning: Basic salary cannot be negative. Setting to 0.");
+            this.basicSalary = 0;
+        } else {
+            this.basicSalary = basicSalary;
+        }
+        this.bonus = 0;
+    }
+
+    public void creditBonus(double amount) {
+        if (amount <= 0) {
+            System.out.println("Bonus amount must be positive.");
+        } else {
+            bonus += amount;
+            System.out.println("Bonus credited: Rs " + amount);
+        }
+    }
+
+    public void deductTax(double percent) {
+        if (percent < 0 || percent > 100) {
+            System.out.println("Tax percentage must be between 0 and 100.");
+        } else {
+            basicSalary = basicSalary * (1 - percent / 100);
+            System.out.println("Tax deducted: " + percent + "%");
+        }
+    }
+
+    public double getNetSalary() {
+        return basicSalary + bonus;
+    }
+}
+
+// M3. Overloaded Constructors for an Employee
+class Employee {
+    String empId;
+    String empName;
+    double salary;
+    boolean isIntern;
+
+    public Employee(String empId, String empName, double salary) {
+        this.empId = empId;
+        this.empName = empName;
+        this.salary = salary;
+        this.isIntern = false;
+    }
+
+    public Employee(String empId, String empName) {
+        this(empId, empName, 0);
+        this.isIntern = true;
+    }
+
+    void printProfile() {
+        System.out.println(empId + " / " + empName + " / Rs " + salary + " / Intern: " + isIntern);
+    }
+}
+
+// M4. Reference Copies and a Shared Exam Hall Ticket
+class HallTicket {
+    String studentName;
+    int seatNumber;
+
+    public HallTicket(String studentName, int seatNumber) {
+        this.studentName = studentName;
+        this.seatNumber = seatNumber;
+    }
+}
+
+// M5. Instance vs Static: Splitting an Employee Class Correctly
+class EmployeeStatic {
+    String empName;
+    double salary;
+    static String companyName = "Bright Horizon Technologies";
+    static int employeeCount = 0;
+
+    public EmployeeStatic(String empName, double salary) {
+        this.empName = empName;
+        this.salary = salary;
+        employeeCount++;
+    }
+
+    static void printCompanyInfo() {
+        System.out.println(companyName + " Employees on record: " + employeeCount);
+    }
+}
+
+public class Week3Assignment {
+    public static void main(String[] args) {
+        System.out.println("===== M1: Library Inventory =====");
+        BookInventory[] books = new BookInventory[4];
+        books[0] = new BookInventory("Clean Code", "Robert C. Martin", 3);
+        books[1] = new BookInventory("Effective Java", "Joshua Bloch", 5);
+        books[2] = new BookInventory("Refactoring", "Martin Fowler", 0);
+        books[3] = new BookInventory("Design Patterns", "GoF", 2);
+
+        for (BookInventory book : books) {
+            book.printEntry();
+        }
+
+        System.out.println("\n===== M2: Encapsulated Payroll Account =====");
+        PayrollAccount account = new PayrollAccount(50000);
+        account.creditBonus(5000);
+        account.deductTax(10);
+        System.out.println("Net salary: Rs " + account.getNetSalary());
+
+        System.out.println("\n===== M3: Overloaded Constructors for an Employee =====");
+        Employee permEmp = new Employee("E-101", "Divya", 65000);
+        Employee internEmp = new Employee("E-102", "Arjun");
+
+        System.out.print("Permanent: E-101, Divya, 65000\nIntern: E-102, Arjun\n");
+        permEmp.printProfile();
+        internEmp.printProfile();
+
+        System.out.println("\n===== M4: Reference Copies and a Shared Exam Hall Ticket =====");
+        HallTicket priya = new HallTicket("Priya", 0);
+        HallTicket copy = priya;
+        copy.seatNumber = 45;
+        HallTicket separate = new HallTicket("Priya", 45);
+
+        System.out.println("Priya's seatNumber (via first variable): " + priya.seatNumber);
+        System.out.println("copy == priya: " + (copy == priya));
+        System.out.println("separate == priya: " + (separate == priya));
+
+        System.out.println("\n===== M5: Instance vs Static =====");
+        new EmployeeStatic("Alice", 70000);
+        new EmployeeStatic("Bob", 60000);
+        new EmployeeStatic("Charlie", 55000);
+        EmployeeStatic.printCompanyInfo();
+    }
+}
