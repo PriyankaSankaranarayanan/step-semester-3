@@ -1,0 +1,146 @@
+// M1. From Parallel Arrays to a Class - Placement Record
+class PlacementRecord {
+    String studentName;
+    String company;
+    double packageLpa;
+
+    public PlacementRecord(String studentName, String company, double packageLpa) {
+        this.studentName = studentName;
+        this.company = company;
+        this.packageLpa = packageLpa;
+    }
+
+    void printRecord() {
+        System.out.println(studentName + " -> " + company + " @ " + packageLpa + " LPA");
+    }
+}
+
+// M2. Encapsulated Mess-Card Wallet
+class MessWallet {
+    private double balance;
+
+    public MessWallet(double openingBalance) {
+        if (openingBalance < 0) {
+            System.out.println("Warning: Opening balance cannot be negative. Starting at 0.");
+            this.balance = 0;
+        } else {
+            this.balance = openingBalance;
+        }
+    }
+
+    public void topUp(double amount) {
+        if (amount <= 0) {
+            System.out.println("Top-up amount must be positive.");
+        } else {
+            balance += amount;
+            System.out.println("Balance after top-up: " + balance);
+        }
+    }
+
+    public void deduct(double amount) {
+        if (amount > balance) {
+            System.out.println("Deduct rejected: insufficient balance");
+        } else {
+            balance -= amount;
+            System.out.println("Balance after deduction: " + balance);
+        }
+    }
+
+    public double getBalance() {
+        return balance;
+    }
+}
+
+// M3. Overloaded Constructors for a Course
+class Course {
+    String code;
+    String title;
+    int credits;
+    int labCredits;
+
+    public Course(String code, String title, int credits, int labCredits) {
+        this.code = code;
+        this.title = title;
+        this.credits = credits;
+        this.labCredits = labCredits;
+    }
+
+    public Course(String code, String title, int credits) {
+        this(code, title, credits, 0);
+    }
+
+    public int totalCredits() {
+        return credits + labCredits;
+    }
+}
+
+// M4. Reference Copies and a Shared ID Card
+class IdCard {
+    String name;
+    int booksIssued;
+
+    public IdCard(String name, int booksIssued) {
+        this.name = name;
+        this.booksIssued = booksIssued;
+    }
+}
+
+// M5. Instance vs Static: Splitting a Class Correctly
+class Student {
+    String name;
+    int attendance;
+    static String collegeName = "SRM Institute of Science and Technology";
+    static int studentCount = 0;
+
+    public Student(String name, int attendance) {
+        this.name = name;
+        this.attendance = attendance;
+        studentCount++;
+    }
+
+    static void printCollegeInfo() {
+        System.out.println(collegeName + " Students created: " + studentCount);
+    }
+}
+
+public class Week3Assignment {
+    public static void main(String[] args) {
+        System.out.println("===== M1: Placement Records =====");
+        PlacementRecord[] records = new PlacementRecord[3];
+        records[0] = new PlacementRecord("Ravi", "TCS", 4.5);
+        records[1] = new PlacementRecord("Anitha", "Zoho", 6.2);
+        records[2] = new PlacementRecord("Karthik", "Infosys", 4.0);
+
+        for (PlacementRecord record : records) {
+            record.printRecord();
+        }
+
+        System.out.println("\n===== M2: Mess-Card Wallet =====");
+        MessWallet wallet = new MessWallet(500);
+        wallet.topUp(200);
+        wallet.deduct(1000); // Should be rejected
+        System.out.println("Final balance: " + wallet.getBalance());
+
+        System.out.println("\n===== M3: Overloaded Constructors for a Course =====");
+        Course theoryCourse = new Course("21CSC201J", "Data Structures", 4);
+        Course labCourse = new Course("21CSC205L", "DSA Lab", 3, 1);
+
+        System.out.println("21CSC201J total credits: " + theoryCourse.totalCredits());
+        System.out.println("21CSC205L total credits: " + labCourse.totalCredits());
+
+        System.out.println("\n===== M4: Reference Copies and a Shared ID Card =====");
+        IdCard ravi = new IdCard("Ravi", 0);
+        IdCard duplicate = ravi;
+        duplicate.booksIssued = 3;
+        IdCard separate = new IdCard("Ravi", 3);
+
+        System.out.println("Ravi's booksIssued (via first variable): " + ravi.booksIssued);
+        System.out.println("duplicate == ravi: " + (duplicate == ravi));
+        System.out.println("separate == ravi: " + (separate == ravi));
+
+        System.out.println("\n===== M5: Instance vs Static =====");
+        new Student("Arjun", 75);
+        new Student("Priya", 80);
+        Student.printCollegeInfo();
+    }
+}
