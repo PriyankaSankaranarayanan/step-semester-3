@@ -1,0 +1,295 @@
+import java.util.Scanner;
+
+public class Main {
+
+    // ---------------------------------------------------
+    // 1. Exam Hall Seat Duplication Checker
+    // ---------------------------------------------------
+    static void checkDuplicateSeats(int[] seatNumbers) {
+
+        boolean duplicateFound = false;
+
+        for (int i = 0; i < seatNumbers.length; i++) {
+
+            for (int j = i + 1; j < seatNumbers.length; j++) {
+
+                if (seatNumbers[i] == seatNumbers[j]) {
+
+                    // Avoid printing the same duplicate multiple times
+                    boolean alreadyPrinted = false;
+
+                    for (int k = 0; k < i; k++) {
+                        if (seatNumbers[k] == seatNumbers[i]) {
+                            alreadyPrinted = true;
+                            break;
+                        }
+                    }
+
+                    if (!alreadyPrinted) {
+                        System.out.println(
+                            "Duplicate Seat Number Found: " + seatNumbers[i]
+                        );
+                    }
+
+                    duplicateFound = true;
+                }
+            }
+        }
+
+        if (!duplicateFound) {
+            System.out.println("No Duplicate Seats Found");
+        }
+    }
+
+
+    // ---------------------------------------------------
+    // 2. Typing Speed Test Accuracy Checker
+    // ---------------------------------------------------
+    static void checkTypingAccuracy(String original, String typed) {
+
+        int matched = 0;
+        int firstMismatch = -1;
+
+        for (int i = 0; i < original.length(); i++) {
+
+            if (original.charAt(i) == typed.charAt(i)) {
+                matched++;
+            } else if (firstMismatch == -1) {
+                firstMismatch = i;
+            }
+        }
+
+        double accuracy =
+            ((double) matched / original.length()) * 100;
+
+        if (firstMismatch == -1) {
+
+            System.out.printf(
+                "Matched: %d/%d | Accuracy: %.2f%% | No Mismatches%n",
+                matched,
+                original.length(),
+                accuracy
+            );
+
+        } else {
+
+            System.out.printf(
+                "Matched: %d/%d | Accuracy: %.2f%% | " +
+                "First Mismatch at position %d ('%c' vs '%c')%n",
+                matched,
+                original.length(),
+                accuracy,
+                firstMismatch + 1,
+                original.charAt(firstMismatch),
+                typed.charAt(firstMismatch)
+            );
+        }
+    }
+
+
+    // ---------------------------------------------------
+    // 3. Traffic Signal Streak Analyzer
+    // ---------------------------------------------------
+    static void findLongestStreak(String signalLog) {
+
+        if (signalLog.length() == 0) {
+            System.out.println("Signal log is empty");
+            return;
+        }
+
+        char longestColor = signalLog.charAt(0);
+
+        int longestStreak = 1;
+        int currentStreak = 1;
+
+        for (int i = 1; i < signalLog.length(); i++) {
+
+            if (signalLog.charAt(i) == signalLog.charAt(i - 1)) {
+
+                currentStreak++;
+
+            } else {
+
+                currentStreak = 1;
+            }
+
+            if (currentStreak > longestStreak) {
+
+                longestStreak = currentStreak;
+                longestColor = signalLog.charAt(i);
+            }
+        }
+
+        System.out.println(
+            "Longest Streak: '" + longestColor +
+            "' repeated " + longestStreak + " times"
+        );
+    }
+
+
+    // ---------------------------------------------------
+    // 4. Warehouse Inventory Balancer
+    // ---------------------------------------------------
+    static void analyzeInventory(int[] sectionA, int[] sectionB) {
+
+        int totalA = 0;
+        int totalB = 0;
+
+        // Calculate total of Section A
+        for (int i = 0; i < sectionA.length; i++) {
+            totalA += sectionA[i];
+        }
+
+        // Calculate total of Section B
+        for (int i = 0; i < sectionB.length; i++) {
+            totalB += sectionB[i];
+        }
+
+        String status;
+
+        if (totalA == totalB) {
+            status = "Balanced";
+        } else {
+            status = "Not Balanced";
+        }
+
+        // Find highest quantity
+        int highest = sectionA[0];
+        String highestSection = "Section A";
+        int highestIndex = 0;
+
+        // Check Section A
+        for (int i = 0; i < sectionA.length; i++) {
+
+            if (sectionA[i] > highest) {
+                highest = sectionA[i];
+                highestSection = "Section A";
+                highestIndex = i;
+            }
+        }
+
+        // Check Section B
+        for (int i = 0; i < sectionB.length; i++) {
+
+            if (sectionB[i] > highest) {
+                highest = sectionB[i];
+                highestSection = "Section B";
+                highestIndex = i;
+            }
+        }
+
+        System.out.println(
+            "Section A Total: " + totalA +
+            " | Section B Total: " + totalB +
+            " | Status: " + status +
+            " | Highest Quantity: " + highest +
+            " (" + highestSection +
+            ", Item " + (highestIndex + 1) + ")"
+        );
+    }
+
+
+    // ---------------------------------------------------
+    // 5. Movie Review Word Length Profiler
+    // ---------------------------------------------------
+    static void classifyWordLengths(String review) {
+
+        String[] words = review.trim().split("\\s+");
+
+        int shortWords = 0;
+        int mediumWords = 0;
+        int longWords = 0;
+
+        for (int i = 0; i < words.length; i++) {
+
+            int length = words[i].length();
+
+            if (length >= 1 && length <= 4) {
+
+                shortWords++;
+
+            } else if (length >= 5 && length <= 8) {
+
+                mediumWords++;
+
+            } else if (length >= 9) {
+
+                longWords++;
+            }
+        }
+
+        System.out.println(
+            "Short: " + shortWords +
+            " | Medium: " + mediumWords +
+            " | Long: " + longWords
+        );
+    }
+
+
+    // ---------------------------------------------------
+    // MAIN METHOD
+    // ---------------------------------------------------
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+
+        // =================================================
+        // Problem 1
+        // =================================================
+
+        System.out.println("===== PROBLEM 1 =====");
+
+        int[] seats = {101, 102, 103, 102, 105};
+
+        checkDuplicateSeats(seats);
+
+
+        // =================================================
+        // Problem 2
+        // =================================================
+
+        System.out.println("\n===== PROBLEM 2 =====");
+
+        String original = "hello world";
+        String typed = "hello worlt";
+
+        checkTypingAccuracy(original, typed);
+
+
+        // =================================================
+        // Problem 3
+        // =================================================
+
+        System.out.println("\n===== PROBLEM 3 =====");
+
+        String signalLog = "RRGGGYRR";
+
+        findLongestStreak(signalLog);
+
+
+        // =================================================
+        // Problem 4
+        // =================================================
+
+        System.out.println("\n===== PROBLEM 4 =====");
+
+        int[] sectionA = {20, 15, 30};
+        int[] sectionB = {25, 10, 30};
+
+        analyzeInventory(sectionA, sectionB);
+
+
+        // =================================================
+        // Problem 5
+        // =================================================
+
+        System.out.println("\n===== PROBLEM 5 =====");
+
+        String review =
+            "This movie was absolutely fantastic and thrilling";
+
+        classifyWordLengths(review);
+
+        sc.close();
+    }
+}
