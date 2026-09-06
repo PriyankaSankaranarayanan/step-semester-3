@@ -1,0 +1,176 @@
+import java.util.Scanner;
+
+public class Main {
+
+    // 1. Vowel & Consonant Counter
+    static void countVowelsAndConsonants(String text) {
+        int vowels = 0;
+        int consonants = 0;
+
+        for (int i = 0; i < text.length(); i++) {
+            char ch = Character.toLowerCase(text.charAt(i));
+
+            if (ch == 'a' || ch == 'e' || ch == 'i' ||
+                ch == 'o' || ch == 'u') {
+                vowels++;
+            } 
+            else if (ch >= 'a' && ch <= 'z') {
+                consonants++;
+            }
+        }
+
+        System.out.println("Vowels: " + vowels +
+                           " | Consonants: " + consonants);
+    }
+
+
+    // 2. CSV Student Record Parser
+    static void parseStudentRecord(String csvLine) {
+        String[] fields = csvLine.split(",");
+
+        if (fields.length != 3) {
+            System.out.println("Invalid Record");
+            return;
+        }
+
+        System.out.println("Name: " + fields[0] +
+                           " | Roll No: " + fields[1] +
+                           " | Dept: " + fields[2]);
+    }
+
+
+    // 3. File Extension Validator
+    static String validateFileExtension(String filename) {
+        int dot = filename.lastIndexOf('.');
+
+        if (dot == -1 || dot == filename.length() - 1) {
+            return "Rejected — invalid file type";
+        }
+
+        String extension = filename.substring(dot + 1);
+
+        if (extension.equalsIgnoreCase("pdf") ||
+            extension.equalsIgnoreCase("docx") ||
+            extension.equalsIgnoreCase("zip")) {
+            return "Accepted";
+        }
+
+        return "Rejected — invalid file type";
+    }
+
+
+    // 4. Masked Phone Number Formatter
+    static String maskPhoneNumber(String phone) {
+
+        if (phone.length() != 10) {
+            return "Invalid phone number";
+        }
+
+        for (int i = 0; i < phone.length(); i++) {
+            if (!Character.isDigit(phone.charAt(i))) {
+                return "Invalid phone number";
+            }
+        }
+
+        String lastFour = phone.substring(6);
+
+        StringBuilder result = new StringBuilder("XXXXXX");
+        result.insert(6, "-");
+        result.append(lastFour);
+
+        return result.toString();
+    }
+
+
+    // 5. Bank Transaction Reference Generator & Validator
+    static String normalizeReference(String raw) {
+        String reference = raw.trim();
+
+        if (reference.length() < 3) {
+            return reference;
+        }
+
+        String bankCode = reference.substring(0, 3).toUpperCase();
+        String remaining = reference.substring(3);
+
+        return bankCode + remaining;
+    }
+
+    static String validateAndFormat(String reference) {
+
+        reference = normalizeReference(reference);
+
+        // Check length
+        if (reference.length() != 14) {
+            return "Invalid: wrong length";
+        }
+
+        // Check first 3 characters are letters
+        for (int i = 0; i < 3; i++) {
+            if (!Character.isLetter(reference.charAt(i))) {
+                return "Invalid: bank code must be 3 letters";
+            }
+        }
+
+        // Check remaining 11 characters are digits
+        for (int i = 3; i < 14; i++) {
+            if (!Character.isDigit(reference.charAt(i))) {
+                return "Invalid: body must contain only digits";
+            }
+        }
+
+        String bankCode = reference.substring(0, 3);
+        String date = reference.substring(3, 9);
+        String sequence = reference.substring(9, 14);
+
+        String formattedDate =
+                date.substring(0, 2) + "/" +
+                date.substring(2, 4) + "/" +
+                date.substring(4, 6);
+
+        StringBuilder result = new StringBuilder();
+
+        result.append("[")
+              .append(bankCode)
+              .append("] DATE: ")
+              .append(formattedDate)
+              .append(" | SEQ: ")
+              .append(sequence);
+
+        return result.toString();
+    }
+
+
+    // Main Method
+    public static void main(String[] args) {
+
+        Scanner sc = new Scanner(System.in);
+
+        // ---------- Problem 1 ----------
+        System.out.println("Enter text for Vowel & Consonant Counter:");
+        String text = sc.nextLine();
+        countVowelsAndConsonants(text);
+
+        // ---------- Problem 2 ----------
+        System.out.println("\nEnter CSV Student Record:");
+        String csvLine = sc.nextLine();
+        parseStudentRecord(csvLine);
+
+        // ---------- Problem 3 ----------
+        System.out.println("\nEnter filename:");
+        String filename = sc.nextLine();
+        System.out.println(validateFileExtension(filename));
+
+        // ---------- Problem 4 ----------
+        System.out.println("\nEnter phone number:");
+        String phone = sc.nextLine();
+        System.out.println(maskPhoneNumber(phone));
+
+        // ---------- Problem 5 ----------
+        System.out.println("\nEnter bank transaction reference:");
+        String reference = sc.nextLine();
+        System.out.println(validateAndFormat(reference));
+
+        sc.close();
+    }
+}
