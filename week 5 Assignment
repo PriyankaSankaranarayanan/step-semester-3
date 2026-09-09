@@ -1,0 +1,464 @@
+```java
+// ===============================
+// PROBLEM 1
+// Membership Field Reach Checker
+// ===============================
+
+class AccessChecker {
+
+    static String classifyAccess(String modifier, String context) {
+
+        if (modifier.equals("public"))
+            return "ALLOWED";
+
+        if (modifier.equals("private"))
+            return context.equals("SAME_CLASS") ? "ALLOWED" : "DENIED";
+
+        if (modifier.equals("default"))
+            return (context.equals("SAME_CLASS") ||
+                    context.equals("SAME_PACKAGE")) ? "ALLOWED" : "DENIED";
+
+        if (modifier.equals("protected"))
+            return (context.equals("SAME_CLASS") ||
+                    context.equals("SAME_PACKAGE") ||
+                    context.equals("SUBCLASS_DIFFERENT_PACKAGE_OWN_TYPE"))
+                    ? "ALLOWED" : "DENIED";
+
+        return "DENIED";
+    }
+
+    static String summarizeByModifier(String[][] attempts) {
+
+        String[] modifiers = {
+            "private", "default", "protected", "public"
+        };
+
+        String result = "";
+
+        for (String modifier : modifiers) {
+
+            int allowed = 0;
+            int denied = 0;
+
+            for (String[] attempt : attempts) {
+
+                if (attempt[0].equals(modifier)) {
+
+                    if (classifyAccess(
+                            attempt[0], attempt[1]).equals("ALLOWED"))
+                        allowed++;
+                    else
+                        denied++;
+                }
+            }
+
+            if (!result.isEmpty())
+                result += " | ";
+
+            result += modifier + ": " +
+                      allowed + " allowed / " +
+                      denied + " denied";
+        }
+
+        return result;
+    }
+}
+
+
+// ===============================
+// LibraryMember for Problem 1
+// ===============================
+
+class LibraryMember1 {
+
+    private String membershipPin;
+    String branchCode;
+    protected double finesOwed;
+    public String displayName;
+}
+
+
+// ===============================
+// PROBLEM 2
+// Reference Desk Subclass Reach
+// ===============================
+
+class AccessChecker2 {
+
+    static String classifyAccess(String modifier, String context) {
+
+        if (modifier.equals("public"))
+            return "ALLOWED";
+
+        if (modifier.equals("private"))
+            return context.equals("SAME_CLASS")
+                    ? "ALLOWED" : "DENIED";
+
+        if (modifier.equals("default"))
+            return (context.equals("SAME_CLASS") ||
+                    context.equals("SAME_PACKAGE"))
+                    ? "ALLOWED" : "DENIED";
+
+        if (modifier.equals("protected"))
+            return (context.equals("SAME_CLASS") ||
+                    context.equals("SAME_PACKAGE") ||
+                    context.equals(
+                    "SUBCLASS_DIFFERENT_PACKAGE_OWN_TYPE"))
+                    ? "ALLOWED" : "DENIED";
+
+        return "DENIED";
+    }
+
+    static String firstDeniedAttempt(String[][] attempts) {
+
+        for (int i = 0; i < attempts.length; i++) {
+
+            if (classifyAccess(
+                    attempts[i][0],
+                    attempts[i][1]).equals("DENIED")) {
+
+                return attempts[i][0] +
+                       " via " +
+                       attempts[i][1] +
+                       " (attempt #" +
+                       (i + 1) + ")";
+            }
+        }
+
+        return "None Denied";
+    }
+}
+
+
+// ===============================
+// PROBLEM 3
+// Book Copy Circulation Guard
+// ===============================
+
+class BookInventory {
+
+    private int copiesTotal;
+    private int copiesAvailable;
+
+    BookInventory(int copiesTotal) {
+
+        this.copiesTotal = copiesTotal;
+        this.copiesAvailable = copiesTotal;
+    }
+
+    void checkOut() {
+
+        if (copiesAvailable > 0)
+            copiesAvailable--;
+    }
+
+    void checkIn() {
+
+        if (copiesAvailable < copiesTotal)
+            copiesAvailable++;
+    }
+
+    int getCopiesAvailable() {
+
+        return copiesAvailable;
+    }
+}
+
+
+// ===============================
+// PROBLEM 4
+// LibraryMember JavaBean
+// ===============================
+
+class LibraryMember4 {
+
+    private String membershipId;
+    private String name;
+    private boolean premiumMember;
+    private String securityAnswer;
+
+    public LibraryMember4() {
+    }
+
+    public String getMembershipId() {
+
+        return membershipId;
+    }
+
+    public void setMembershipId(String id) {
+
+        if (membershipId == null)
+            membershipId = id;
+    }
+
+    public String getName() {
+
+        return name;
+    }
+
+    public void setName(String name) {
+
+        this.name = name;
+    }
+
+    public boolean isPremiumMember() {
+
+        return premiumMember;
+    }
+
+    public void setPremiumMember(boolean premium) {
+
+        this.premiumMember = premium;
+    }
+
+    public void setSecurityAnswer(String answer) {
+
+        securityAnswer =
+            Integer.toHexString(answer.hashCode());
+    }
+}
+
+
+// ===============================
+// PROBLEM 5
+// Immutable Loan Receipt
+// ===============================
+
+final class LoanReceipt {
+
+    private final String memberId;
+    private final String[] bookIds;
+
+    public LoanReceipt(
+            String memberId,
+            String[] bookIds) {
+
+        this.memberId = memberId;
+        this.bookIds = bookIds.clone();
+    }
+
+    public String[] getBookIds() {
+
+        return bookIds.clone();
+    }
+
+    public LoanReceipt withCorrectedBookId(
+            int index,
+            String newId) {
+
+        String[] copy = bookIds.clone();
+
+        copy[index] = newId;
+
+        return new LoanReceipt(memberId, copy);
+    }
+}
+
+
+// ===============================
+// Reference Only Receipt
+// ===============================
+
+class ReferenceOnlyLoanReceipt
+        extends LoanReceipt {
+
+    private String roomNumber;
+
+    public ReferenceOnlyLoanReceipt(
+            String memberId,
+            String[] bookIds,
+            String roomNumber) {
+
+        super(memberId, bookIds);
+
+        this.roomNumber = roomNumber;
+    }
+}
+
+
+// ===============================
+// Circulation Ledger
+// ===============================
+
+class CirculationLedger {
+
+    static String branchCode;
+
+    static {
+
+        branchCode = "PT-BRANCH";
+    }
+
+    static String processNightlyCirculation(
+            LoanReceipt[] receipts) {
+
+        int processed = 0;
+        int skipped = 0;
+        int reference = 0;
+        int regular = 0;
+
+        for (LoanReceipt receipt : receipts) {
+
+            if (receipt == null) {
+
+                skipped++;
+                continue;
+            }
+
+            processed++;
+
+            if (receipt instanceof ReferenceOnlyLoanReceipt)
+                reference++;
+            else
+                regular++;
+        }
+
+        return processed +
+               " processed | " +
+               skipped +
+               " null skipped | " +
+               reference +
+               " reference-only | " +
+               regular +
+               " regular";
+    }
+}
+
+
+// ===============================
+// MAIN CLASS
+// ===============================
+
+public class Main {
+
+    public static void main(String[] args) {
+
+        // Problem 1
+        String[][] attempts1 = {
+            {"private", "SAME_CLASS"},
+            {"private", "SAME_PACKAGE"},
+            {"default", "SAME_PACKAGE"},
+            {"default", "DIFFERENT_PACKAGE"},
+            {"protected", "SAME_PACKAGE"},
+            {"protected", "SAME_CLASS"},
+            {"public", "DIFFERENT_PACKAGE"}
+        };
+
+        System.out.println(
+            AccessChecker.summarizeByModifier(attempts1)
+        );
+
+
+        // Problem 2
+        String[][] attempts2 = {
+            {"public", "SUBCLASS_DIFFERENT_PACKAGE_PARENT_TYPE"},
+            {"protected", "SUBCLASS_DIFFERENT_PACKAGE_PARENT_TYPE"},
+            {"protected", "SUBCLASS_DIFFERENT_PACKAGE_OWN_TYPE"}
+        };
+
+        System.out.println(
+            AccessChecker2.firstDeniedAttempt(attempts2)
+        );
+
+
+        // Problem 3
+        BookInventory b = new BookInventory(3);
+
+        b.checkOut();
+        b.checkOut();
+        b.checkOut();
+        b.checkOut();
+
+        System.out.println(
+            b.getCopiesAvailable()
+        );
+
+        b.checkIn();
+        b.checkIn();
+        b.checkIn();
+        b.checkIn();
+
+        System.out.println(
+            b.getCopiesAvailable()
+        );
+
+
+        // Problem 4
+        LibraryMember4 member =
+            new LibraryMember4();
+
+        member.setMembershipId("LIB-8841");
+        member.setName("Priya Nair");
+        member.setPremiumMember(true);
+
+        System.out.println(
+            member.getMembershipId()
+        );
+
+        member.setMembershipId("FAKE-0000");
+
+        System.out.println(
+            member.getMembershipId()
+        );
+
+        System.out.println(
+            member.isPremiumMember()
+        );
+
+        member.setSecurityAnswer("BlueMountain");
+
+
+        // Problem 5
+        LoanReceipt receipt =
+            new LoanReceipt(
+                "LIB-8841",
+                new String[]{"BK-100", "BK-101"}
+            );
+
+        String[] ids = receipt.getBookIds();
+
+        ids[0] = "HACKED";
+
+        System.out.println(
+            receipt.getBookIds()[0]
+        );
+
+        LoanReceipt corrected =
+            receipt.withCorrectedBookId(
+                1, "BK-102"
+            );
+
+        System.out.println(
+            receipt.getBookIds()[1]
+        );
+
+        System.out.println(
+            corrected.getBookIds()[1]
+        );
+
+
+        // Nightly circulation
+        LoanReceipt[] receipts = {
+
+            new ReferenceOnlyLoanReceipt(
+                "LIB-001",
+                new String[]{"BK-200"},
+                "Reading Room 3"
+            ),
+
+            null,
+
+            new LoanReceipt(
+                "LIB-002",
+                new String[]{"BK-201"}
+            )
+        };
+
+        System.out.println(
+            CirculationLedger
+                .processNightlyCirculation(receipts)
+        );
+    }
+}
+```
+
