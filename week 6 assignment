@@ -1,0 +1,592 @@
+```java
+class GymMember {
+
+    protected String memberId;
+    protected int monthlyFee;
+    protected int sessionsAttended;
+
+    private int[] lateFeeHistory = new int[10];
+    private int feeCount = 0;
+
+    private final String membershipNumber;
+    private static int membersEnrolled = 0;
+    private int feesPaid = 0;
+
+    // Problem 1 & 2 & 3 & 5
+    public GymMember(String memberId, int monthlyFee) {
+
+        if (memberId == null || memberId.trim().length() < 4)
+            throw new IllegalArgumentException("Invalid Member ID");
+
+        if (monthlyFee <= 0)
+            throw new IllegalArgumentException("Invalid Fee");
+
+        this.memberId = memberId;
+        this.monthlyFee = monthlyFee;
+
+        membersEnrolled++;
+        membershipNumber = "GYM-" + (2000 + membersEnrolled);
+    }
+
+    // Problem 5 constructor
+    public GymMember(int monthlyFee) {
+
+        if (monthlyFee <= 0)
+            throw new IllegalArgumentException("Invalid Fee");
+
+        this.monthlyFee = monthlyFee;
+
+        membersEnrolled++;
+        membershipNumber = "GYM-" + (2000 + membersEnrolled);
+    }
+
+    void attendSession() {
+        sessionsAttended++;
+    }
+
+    int getSessionsAttended() {
+        return sessionsAttended;
+    }
+
+    // Problem 2
+    void displayInfo() {
+        System.out.println(
+            "Standard Member | Sessions: " + sessionsAttended
+        );
+    }
+
+    // Problem 3
+    protected void chargeLateFee(int amount) {
+        lateFeeHistory[feeCount++] = amount;
+    }
+
+    int[] getLateFeeHistory() {
+
+        int[] copy = new int[feeCount];
+
+        for (int i = 0; i < feeCount; i++)
+            copy[i] = lateFeeHistory[i];
+
+        return copy;
+    }
+
+    int getTotalLateFees() {
+
+        int total = 0;
+
+        for (int i = 0; i < feeCount; i++)
+            total += lateFeeHistory[i];
+
+        return total;
+    }
+
+    // Problem 5
+    void payFee(int amount) {
+        feesPaid += amount;
+    }
+
+    void payFee(int amount, String mode) {
+        System.out.println("Payment Mode: " + mode);
+        payFee(amount);
+    }
+
+    int getFeesPaid() {
+        return feesPaid;
+    }
+
+    String getMembershipNumber() {
+        return membershipNumber;
+    }
+
+    // Problem 5
+    static boolean isValidReferralCode(String code) {
+
+        if (code == null || code.length() != 4)
+            return false;
+
+        return code.charAt(0) == 'G'
+                && Character.isDigit(code.charAt(1))
+                && Character.isDigit(code.charAt(2))
+                && Character.isUpperCase(code.charAt(3));
+    }
+
+    static int getMembersEnrolled() {
+        return membersEnrolled;
+    }
+
+    // Problem 1
+    static String signUpBatch(String[] memberIds, int monthlyFee) {
+
+        int signed = 0;
+        int rejected = 0;
+
+        for (String id : memberIds) {
+
+            try {
+                new GymMember(id, monthlyFee);
+                signed++;
+            }
+            catch (IllegalArgumentException e) {
+                rejected++;
+            }
+        }
+
+        return "Signed Up: " + signed +
+               " | Rejected: " + rejected;
+    }
+}
+
+
+// =====================================================
+// PREMIUM MEMBER
+// =====================================================
+
+class PremiumMember extends GymMember {
+
+    String trainerName;
+
+    public PremiumMember(
+            String memberId,
+            int monthlyFee,
+            String trainerName) {
+
+        super(memberId, monthlyFee);
+        this.trainerName = trainerName;
+    }
+
+    // Problem 2 & 4
+    @Override
+    void displayInfo() {
+
+        System.out.println(
+            "Premium Member | Trainer: " +
+            trainerName +
+            " | Sessions: " +
+            sessionsAttended
+        );
+    }
+
+    // Problem 3
+    @Override
+    protected void chargeLateFee(int amount) {
+
+        super.chargeLateFee(amount / 2);
+    }
+
+    String getTrainerName() {
+        return trainerName;
+    }
+}
+
+
+// =====================================================
+// ELITE MEMBER
+// =====================================================
+
+class EliteMember extends PremiumMember {
+
+    String lockerNumber;
+
+    public EliteMember(
+            String memberId,
+            int monthlyFee,
+            String trainerName,
+            String lockerNumber) {
+
+        super(memberId, monthlyFee, trainerName);
+        this.lockerNumber = lockerNumber;
+    }
+
+    // Problem 2
+    @Override
+    void displayInfo() {
+
+        System.out.println(
+            "Elite Member | Trainer: " +
+            trainerName +
+            " | Locker: " +
+            lockerNumber +
+            " | Sessions: " +
+            sessionsAttended
+        );
+    }
+}
+
+
+// =====================================================
+// GROUP CLASS MEMBER
+// =====================================================
+
+class GroupClassMember extends GymMember {
+
+    String className;
+
+    // Problem 2
+    public GroupClassMember(
+            String memberId,
+            int monthlyFee,
+            String className) {
+
+        super(memberId, monthlyFee);
+        this.className = className;
+    }
+
+    // Problem 5
+    public GroupClassMember(
+            int monthlyFee,
+            String className) {
+
+        super(monthlyFee);
+        this.className = className;
+    }
+
+    // Problem 2
+    @Override
+    void displayInfo() {
+
+        System.out.println(
+            "Group Class Member | Class: " +
+            className +
+            " | Sessions: " +
+            sessionsAttended
+        );
+    }
+}
+
+
+// =====================================================
+// MAIN CLASS
+// =====================================================
+
+public class Main {
+
+    // -------------------------------------------------
+    // PROBLEM 2
+    // -------------------------------------------------
+
+    static String classifyGeneration(GymMember member) {
+
+        if (member instanceof EliteMember)
+            return "Multilevel descendant (3 generations deep)";
+
+        if (member instanceof GroupClassMember)
+            return "Hierarchical sibling (independent branch)";
+
+        if (member instanceof PremiumMember)
+            return "Second generation";
+
+        return "Base generation";
+    }
+
+
+    static int getTotalSessionsAttended(
+            GymMember[] members) {
+
+        int total = 0;
+
+        for (GymMember member : members)
+            total += member.getSessionsAttended();
+
+        return total;
+    }
+
+
+    // -------------------------------------------------
+    // PROBLEM 4
+    // -------------------------------------------------
+
+    static String batchPrint(GymMember[] members) {
+
+        StringBuilder result = new StringBuilder();
+
+        for (GymMember member : members) {
+
+            // Polymorphism
+            result.append(
+                member instanceof PremiumMember
+                ? "Premium | Trainer: "
+                    + ((PremiumMember) member).trainerName
+                    + " | Sessions: "
+                    + member.getSessionsAttended()
+                : "Standard | Sessions: "
+                    + member.getSessionsAttended()
+            );
+
+            // Safe downcast
+            if (member instanceof PremiumMember) {
+
+                PremiumMember p =
+                    (PremiumMember) member;
+
+                result.append(
+                    " [Trainer via downcast: "
+                    + p.getTrainerName()
+                    + "]"
+                );
+            }
+
+            result.append(" | ");
+        }
+
+        return result.toString();
+    }
+
+
+    // -------------------------------------------------
+    // PROBLEM 5
+    // -------------------------------------------------
+
+    static String processWeeklyCheckIn(
+            GymMember[] members) {
+
+        int processed = 0;
+        int nullSkipped = 0;
+        int group = 0;
+        int individual = 0;
+
+        for (GymMember member : members) {
+
+            if (member == null) {
+                nullSkipped++;
+                continue;
+            }
+
+            processed++;
+
+            if (member instanceof GroupClassMember)
+                group++;
+            else
+                individual++;
+        }
+
+        return processed +
+                " processed | " +
+                nullSkipped +
+                " null skipped | " +
+                group +
+                " group | " +
+                individual +
+                " individual";
+    }
+
+
+    // =================================================
+    // MAIN
+    // =================================================
+
+    public static void main(String[] args) {
+
+        // =============================================
+        // PROBLEM 1
+        // =============================================
+
+        System.out.println("----- PROBLEM 1 -----");
+
+        PremiumMember p1 =
+            new PremiumMember(
+                "MEM01",
+                2000,
+                "Coach Riya"
+            );
+
+        p1.attendSession();
+        p1.attendSession();
+
+        System.out.println(
+            "Sessions: " +
+            p1.getSessionsAttended()
+        );
+
+        System.out.println(
+            GymMember.signUpBatch(
+                new String[]{
+                    "MEM1",
+                    "GM1",
+                    "MEM2",
+                    " ",
+                    "MEM3"
+                },
+                1000
+            )
+        );
+
+
+        // =============================================
+        // PROBLEM 2
+        // =============================================
+
+        System.out.println("\n----- PROBLEM 2 -----");
+
+        GymMember g =
+            new GymMember("MEM10", 1000);
+
+        PremiumMember p =
+            new PremiumMember(
+                "MEM11",
+                2000,
+                "Coach Riya"
+            );
+
+        EliteMember e =
+            new EliteMember(
+                "MEM12",
+                3000,
+                "Coach Arjun",
+                "L12"
+            );
+
+        GroupClassMember c =
+            new GroupClassMember(
+                "MEM13",
+                1500,
+                "Zumba"
+            );
+
+        g.displayInfo();
+        p.displayInfo();
+        e.displayInfo();
+        c.displayInfo();
+
+        System.out.println(
+            classifyGeneration(e)
+        );
+
+        System.out.println(
+            classifyGeneration(c)
+        );
+
+        p.attendSession();
+        p.attendSession();
+        p.attendSession();
+
+        e.attendSession();
+        e.attendSession();
+
+        c.attendSession();
+        c.attendSession();
+        c.attendSession();
+        c.attendSession();
+
+        System.out.println(
+            "Total Sessions: " +
+            getTotalSessionsAttended(
+                new GymMember[]{p, e, c}
+            )
+        );
+
+
+        // =============================================
+        // PROBLEM 3
+        // =============================================
+
+        System.out.println("\n----- PROBLEM 3 -----");
+
+        PremiumMember p3 =
+            new PremiumMember(
+                "MEM20",
+                2000,
+                "Coach Riya"
+            );
+
+        p3.chargeLateFee(200);
+
+        System.out.println(
+            "Total Late Fee: " +
+            p3.getTotalLateFees()
+        );
+
+        int[] history =
+            p3.getLateFeeHistory();
+
+        history[0] = 999;
+
+        System.out.println(
+            "Actual Fee: " +
+            p3.getLateFeeHistory()[0]
+        );
+
+
+        // =============================================
+        // PROBLEM 4
+        // =============================================
+
+        System.out.println("\n----- PROBLEM 4 -----");
+
+        GymMember[] batch = {
+
+            new GymMember(
+                "MEM30",
+                1000
+            ),
+
+            new PremiumMember(
+                "MEM31",
+                2000,
+                "Coach Riya"
+            )
+        };
+
+        System.out.println(
+            batchPrint(batch)
+        );
+
+
+        // =============================================
+        // PROBLEM 5
+        // =============================================
+
+        System.out.println("\n----- PROBLEM 5 -----");
+
+        GymMember m1 =
+            new GymMember(1000);
+
+        System.out.println(
+            "Membership Number: " +
+            m1.getMembershipNumber()
+        );
+
+        System.out.println(
+            "Members Enrolled: " +
+            GymMember.getMembersEnrolled()
+        );
+
+        System.out.println(
+            GymMember.isValidReferralCode("G45B")
+        );
+
+        System.out.println(
+            GymMember.isValidReferralCode("G4B")
+        );
+
+        System.out.println(
+            GymMember.isValidReferralCode("X45B")
+        );
+
+        m1.payFee(500);
+        m1.payFee(500, "UPI");
+
+        System.out.println(
+            "Fees Paid: " +
+            m1.getFeesPaid()
+        );
+
+        GymMember[] weekly = {
+
+            new GroupClassMember(
+                1500,
+                "Zumba"
+            ),
+
+            null,
+
+            new GymMember(1000)
+        };
+
+        System.out.println(
+            processWeeklyCheckIn(weekly)
+        );
+    }
+}
+```
+
+**Important:** Save the entire code as **`Main.java`** and run it as one program. The five assignment sections are marked inside the same file, so you can easily identify which code belongs to which question. The assignment's five problems cover these requirements across pages 1–6.
