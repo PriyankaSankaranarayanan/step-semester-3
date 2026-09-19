@@ -1,0 +1,393 @@
+import java.util.Arrays;
+
+// ==================== PROBLEM 1 ====================
+
+class LibraryMember1 {
+    String memberId;
+    int borrowLimit, borrowed;
+
+    LibraryMember1(String id, int limit) {
+        if (id == null || id.trim().length() < 4)
+            throw new IllegalArgumentException();
+        memberId = id;
+        borrowLimit = limit;
+    }
+
+    void borrowBook() {
+        if (borrowed < borrowLimit)
+            borrowed++;
+    }
+
+    int getBooksBorrowed() {
+        return borrowed;
+    }
+
+    static String enrollBatch(String[] ids, int limit) {
+        int rejected = 0;
+
+        for (String id : ids) {
+            try {
+                new LibraryMember1(id, limit);
+            } catch (IllegalArgumentException e) {
+                rejected++;
+            }
+        }
+
+        return "Enrolled: " + (ids.length - rejected) +
+               " | Rejected: " + rejected;
+    }
+}
+
+class StudentMember1 extends LibraryMember1 {
+    String course;
+
+    StudentMember1(String id, int limit, String course) {
+        super(id, limit);
+        this.course = course;
+    }
+}
+
+
+// ==================== PROBLEM 2 ====================
+
+class LibraryMember2 {
+    int borrowed;
+
+    LibraryMember2(String id, int limit) {}
+
+    void borrowBook() {
+        borrowed++;
+    }
+
+    int getBooksBorrowed() {
+        return borrowed;
+    }
+
+    void displayInfo() {
+        System.out.println("General Member | Books Borrowed: " + borrowed);
+    }
+
+    static String classifyGeneration(LibraryMember2 m) {
+        if (m instanceof HonorsStudentMember)
+            return "Multilevel descendant (3 generations deep)";
+
+        if (m instanceof FacultyMember)
+            return "Hierarchical sibling (independent branch)";
+
+        return "Base member";
+    }
+
+    static int getTotalBooksBorrowed(LibraryMember2[] members) {
+        int total = 0;
+
+        for (LibraryMember2 m : members)
+            total += m.getBooksBorrowed();
+
+        return total;
+    }
+}
+
+class StudentMember2 extends LibraryMember2 {
+    String course;
+
+    StudentMember2(String id, int limit, String course) {
+        super(id, limit);
+        this.course = course;
+    }
+
+    void displayInfo() {
+        System.out.println("Student Member | Course: " +
+                course + " | Books Borrowed: " + borrowed);
+    }
+}
+
+class HonorsStudentMember extends StudentMember2 {
+    int bonusLimit;
+
+    HonorsStudentMember(String id, int limit,
+                        String course, int bonusLimit) {
+        super(id, limit, course);
+        this.bonusLimit = bonusLimit;
+    }
+
+    void displayInfo() {
+        System.out.println("Honors Student Member | Course: " +
+                course + " | Bonus Limit: " + bonusLimit +
+                " | Books Borrowed: " + borrowed);
+    }
+}
+
+class FacultyMember extends LibraryMember2 {
+    String department;
+
+    FacultyMember(String id, int limit, String department) {
+        super(id, limit);
+        this.department = department;
+    }
+
+    void displayInfo() {
+        System.out.println("Faculty Member | Department: " +
+                department + " | Books Borrowed: " + borrowed);
+    }
+}
+
+
+// ==================== PROBLEM 3 ====================
+
+class LibraryMember3 {
+    private int[] fines = new int[10];
+    private int count = 0;
+
+    protected void chargeFine(int amount) {
+        fines[count++] = amount;
+    }
+
+    int[] getFineHistory() {
+        return Arrays.copyOf(fines, count);
+    }
+
+    int getTotalFine() {
+        int total = 0;
+
+        for (int i = 0; i < count; i++)
+            total += fines[i];
+
+        return total;
+    }
+}
+
+class StudentMember3 extends LibraryMember3 {
+    @Override
+    protected void chargeFine(int amount) {
+        super.chargeFine(amount / 2);
+    }
+}
+
+
+// ==================== PROBLEM 4 ====================
+
+class LibraryMember4 {
+    int borrowed;
+
+    void displayInfo() {
+        System.out.print("General | Books: " + borrowed + " | ");
+    }
+}
+
+class StudentMember4 extends LibraryMember4 {
+    String course;
+
+    StudentMember4(String course) {
+        this.course = course;
+    }
+
+    void displayInfo() {
+        System.out.print("Student | Course: " +
+                course + " | Books: " + borrowed + " | ");
+    }
+}
+
+class Report {
+    static String batchPrint(LibraryMember4[] members) {
+        StringBuilder sb = new StringBuilder();
+
+        for (LibraryMember4 m : members) {
+            m.displayInfo();
+
+            sb.append("[");
+
+            if (m instanceof StudentMember4) {
+                StudentMember4 s = (StudentMember4) m;
+                sb.append("Course via downcast: ")
+                  .append(s.course);
+            } else {
+                sb.append("General");
+            }
+
+            sb.append("] ");
+        }
+
+        return sb.toString();
+    }
+}
+
+
+// ==================== PROBLEM 5 ====================
+
+class LibraryMember5 {
+    static int count = 100;
+
+    final String memberNumber;
+    int borrowed;
+
+    LibraryMember5(int limit) {
+        memberNumber = "LIB-" + (++count);
+    }
+
+    void borrowBook() {
+        borrowed++;
+    }
+
+    void borrowBook(String genre) {
+        System.out.println("Genre: " + genre);
+        borrowBook();
+    }
+
+    static boolean isValidRenewalCode(String code) {
+        if (code == null || code.length() != 4)
+            return false;
+
+        return code.charAt(0) == 'R' &&
+               Character.isDigit(code.charAt(1)) &&
+               Character.isDigit(code.charAt(2)) &&
+               Character.isUpperCase(code.charAt(3));
+    }
+
+    static int getMembersEnrolled() {
+        return count - 100;
+    }
+}
+
+class FacultyMember5 extends LibraryMember5 {
+    String department;
+
+    FacultyMember5(int limit, String department) {
+        super(limit);
+        this.department = department;
+    }
+}
+
+class Audit {
+    static String processNightlyAudit(LibraryMember5[] members) {
+        int processed = 0;
+        int nulls = 0;
+        int faculty = 0;
+
+        for (LibraryMember5 m : members) {
+
+            if (m == null) {
+                nulls++;
+                continue;
+            }
+
+            processed++;
+
+            if (m instanceof FacultyMember5)
+                faculty++;
+        }
+
+        return processed + " processed | " +
+               nulls + " null skipped | " +
+               faculty + " faculty | " +
+               (processed - faculty) + " regular";
+    }
+}
+
+
+// ==================== MAIN ====================
+
+public class Main {
+    public static void main(String[] args) {
+
+        // Problem 1
+        System.out.println(
+            LibraryMember1.enrollBatch(
+                new String[]{"STU1", "LB1", "STU2", " ", "STU3"}, 3
+            )
+        );
+
+
+        // Problem 2
+        StudentMember2 s =
+            new StudentMember2("STU2", 3, "CSE");
+
+        HonorsStudentMember h =
+            new HonorsStudentMember("STU3", 3, "ECE", 2);
+
+        FacultyMember f =
+            new FacultyMember("STU4", 5, "Physics");
+
+        s.borrowBook();
+        s.borrowBook();
+
+        h.borrowBook();
+
+        f.borrowBook();
+        f.borrowBook();
+        f.borrowBook();
+
+        s.displayInfo();
+        h.displayInfo();
+        f.displayInfo();
+
+        System.out.println(
+            LibraryMember2.classifyGeneration(h)
+        );
+
+        System.out.println(
+            LibraryMember2.classifyGeneration(f)
+        );
+
+        System.out.println(
+            LibraryMember2.getTotalBooksBorrowed(
+                new LibraryMember2[]{s, h, f}
+            )
+        );
+
+
+        // Problem 3
+        StudentMember3 sm = new StudentMember3();
+
+        sm.chargeFine(100);
+
+        System.out.println(sm.getTotalFine());
+        System.out.println(
+            Arrays.toString(sm.getFineHistory())
+        );
+
+
+        // Problem 4
+        LibraryMember4[] members = {
+            new LibraryMember4(),
+            new StudentMember4("ECE")
+        };
+
+        System.out.println(
+            Report.batchPrint(members)
+        );
+
+
+        // Problem 5
+        LibraryMember5 m =
+            new LibraryMember5(3);
+
+        System.out.println(m.memberNumber);
+
+        m.borrowBook();
+        m.borrowBook("Fiction");
+
+        System.out.println(m.borrowed);
+
+        System.out.println(
+            LibraryMember5.isValidRenewalCode("R12A")
+        );
+
+        System.out.println(
+            LibraryMember5.isValidRenewalCode("R1A")
+        );
+
+        System.out.println(
+            LibraryMember5.isValidRenewalCode("X12A")
+        );
+
+        LibraryMember5[] audit = {
+            new FacultyMember5(5, "Physics"),
+            null,
+            new LibraryMember5(3)
+        };
+
+        System.out.println(
+            Audit.processNightlyAudit(audit)
+        );
+    }
+}
