@@ -1,0 +1,221 @@
+// PROBLEM 1: Interface
+interface Ringable {
+    String ring();
+}
+
+class AlarmClock implements Ringable {
+    String time;
+
+    AlarmClock(String time) {
+        this.time = time;
+    }
+
+    public String ring() {
+        return "Alarm ringing for " + time;
+    }
+}
+
+class Doorbell implements Ringable {
+    String location;
+
+    Doorbell(String location) {
+        this.location = location;
+    }
+
+    public String ring() {
+        return "Doorbell ringing at " + location;
+    }
+}
+
+
+// PROBLEM 2: Abstract Class
+abstract class ArtPiece {
+    final String pieceId;
+    static int count = 1;
+
+    ArtPiece() {
+        pieceId = "P" + count++;
+    }
+
+    abstract String describe();
+
+    String getPieceId() {
+        return pieceId;
+    }
+}
+
+class Painting extends ArtPiece {
+    String title;
+
+    Painting(String title) {
+        this.title = title;
+    }
+
+    String describe() {
+        return "Painting: " + title + ", framed on canvas";
+    }
+}
+
+class Sculpture extends ArtPiece {
+    String title;
+
+    Sculpture(String title) {
+        this.title = title;
+    }
+
+    String describe() {
+        return "Sculpture: " + title + ", carved from stone";
+    }
+}
+
+
+// PROBLEM 3: Multilevel Inheritance
+abstract class GardenTool {
+    abstract String use();
+}
+
+class CuttingTool extends GardenTool {
+    String use() {
+        return "Using the tool in the garden, blade sharpened first";
+    }
+}
+
+class Pruner extends CuttingTool {
+    String use() {
+        return super.use() + ", then trimming branches precisely";
+    }
+}
+
+
+// PROBLEM 4: Abstract Class + Interface + Overloading
+abstract class ClassroomDevice {
+    abstract String operate();
+}
+
+interface Chargeable {
+    String charge();
+    String charge(int minutes);
+}
+
+class Tablet extends ClassroomDevice implements Chargeable {
+    String assetTag;
+
+    Tablet(String assetTag) {
+        this.assetTag = assetTag;
+    }
+
+    String operate() {
+        return "Tablet " + assetTag + " displaying lesson";
+    }
+
+    public String charge() {
+        return assetTag + " charging";
+    }
+
+    public String charge(int minutes) {
+        return assetTag + " charging for " + minutes + " minutes";
+    }
+}
+
+
+// PROBLEM 5: Hierarchical Inheritance + instanceof
+abstract class Drone {
+    String id;
+
+    Drone(String id) {
+        this.id = id;
+    }
+
+    abstract String fly();
+}
+
+interface Trackable {
+    String getLocation();
+}
+
+class DeliveryDrone extends Drone implements Trackable {
+    DeliveryDrone(String id) {
+        super(id);
+    }
+
+    String fly() {
+        return id + " flying";
+    }
+
+    public String getLocation() {
+        return id + " at Sector 4";
+    }
+}
+
+class ScoutDrone extends Drone {
+    ScoutDrone(String id) {
+        super(id);
+    }
+
+    String fly() {
+        return id + " scouting";
+    }
+}
+
+class GroundRobot implements Trackable {
+    String id;
+
+    GroundRobot(String id) {
+        this.id = id;
+    }
+
+    public String getLocation() {
+        return id + " at Sector 4";
+    }
+}
+
+
+// Main class
+public class Main {
+
+    static void ringAll(Ringable[] devices) {
+        for (Ringable d : devices)
+            System.out.println(d.ring());
+    }
+
+    static String getLocationIfTrackable(Object o) {
+        if (o instanceof Trackable)
+            return ((Trackable) o).getLocation();
+        return "Tracking not available";
+    }
+
+    public static void main(String[] args) {
+
+        // Problem 1
+        AlarmClock a = new AlarmClock("7:00 AM");
+        Doorbell d = new Doorbell("Front Door");
+        ringAll(new Ringable[]{a, d});
+
+        // Problem 2
+        Painting p = new Painting("Sunset Fields");
+        Sculpture s = new Sculpture("The Thinker II");
+        System.out.println(p.describe());
+        System.out.println(s.describe());
+
+        // Problem 3
+        CuttingTool c = new CuttingTool();
+        Pruner pr = new Pruner();
+        System.out.println(c.use());
+        System.out.println(pr.use());
+
+        // Problem 4
+        Tablet t = new Tablet("TAB-5");
+        System.out.println(t.operate());
+        System.out.println(t.charge());
+        System.out.println(t.charge(30));
+
+        // Problem 5
+        DeliveryDrone dd = new DeliveryDrone("DR-1");
+        ScoutDrone sd = new ScoutDrone("SC-1");
+        GroundRobot g = new GroundRobot("GR-1");
+
+        System.out.println(getLocationIfTrackable(dd));
+        System.out.println(getLocationIfTrackable(sd));
+        System.out.println(getLocationIfTrackable(g));
+    }
+}
