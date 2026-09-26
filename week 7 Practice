@@ -1,0 +1,213 @@
+// WEEK 7 - ABSTRACTION & INTERFACE
+
+// ---------- QUESTION 1 ----------
+abstract class Toy {
+    static int count = 1000;
+    final String toyId;
+    String name;
+
+    Toy(String name) {
+        this.name = name;
+        toyId = "TOY-" + (++count);
+    }
+
+    abstract String makeSound();
+
+    String getToyId() {
+        return toyId;
+    }
+}
+
+class ToyCar extends Toy {
+    ToyCar(String name) {
+        super(name);
+    }
+
+    String makeSound() {
+        return name + ": Vroom vroom!";
+    }
+}
+
+class ToyRobot extends Toy {
+    ToyRobot(String name) {
+        super(name);
+    }
+
+    String makeSound() {
+        return name + ": Beep boop!";
+    }
+}
+
+
+// ---------- QUESTION 2 ----------
+interface Printable {
+    String printLabel();
+}
+
+class PackageBox implements Printable {
+    String trackingId;
+
+    PackageBox(String trackingId) {
+        this.trackingId = trackingId;
+    }
+
+    public String printLabel() {
+        return "Package label: " + trackingId;
+    }
+}
+
+class Invoice implements Printable {
+    String invoiceNumber;
+
+    Invoice(String invoiceNumber) {
+        this.invoiceNumber = invoiceNumber;
+    }
+
+    public String printLabel() {
+        return "Invoice label: " + invoiceNumber;
+    }
+}
+
+
+// ---------- QUESTION 3 ----------
+abstract class Instrument {
+    abstract String play();
+}
+
+class StringInstrument extends Instrument {
+    public String play() {
+        return "Strumming the strings";
+    }
+}
+
+class Violin extends StringInstrument {
+    public String play() {
+        return super.play() +
+               ", with a bow drawn across four strings";
+    }
+}
+
+
+// ---------- QUESTION 4 ----------
+abstract class KitchenTool {
+    private int speedLevel = 1;
+
+    abstract String prepare();
+
+    int getSpeedLevel() {
+        return speedLevel;
+    }
+
+    void setSpeedLevel(int speedLevel) {
+        if (speedLevel >= 1 && speedLevel <= 5)
+            this.speedLevel = speedLevel;
+    }
+}
+
+interface Washable {
+    String clean();
+}
+
+class Blender extends KitchenTool implements Washable {
+    public String prepare() {
+        return "Blending at speed " + getSpeedLevel();
+    }
+
+    public String clean() {
+        return "Blender rinsed and dried";
+    }
+}
+
+
+// ---------- QUESTION 5 ----------
+abstract class DeliveryNote {
+    String trackingId;
+
+    DeliveryNote(String trackingId) {
+        this.trackingId = trackingId;
+    }
+
+    abstract String confirmDelivery();
+
+    String confirmDelivery(String signature) {
+        return confirmDelivery() + ", signed by " + signature;
+    }
+}
+
+class ParcelNote extends DeliveryNote {
+    ParcelNote(String trackingId) {
+        super(trackingId);
+    }
+
+    String confirmDelivery() {
+        return "Parcel " + trackingId + " delivered";
+    }
+}
+
+class LetterNote extends DeliveryNote {
+    LetterNote(String trackingId) {
+        super(trackingId);
+    }
+
+    String confirmDelivery() {
+        return "Letter " + trackingId + " delivered";
+    }
+}
+
+
+// ---------- MAIN ----------
+public class Main {
+    public static void main(String[] args) {
+
+        // Q1
+        ToyCar c = new ToyCar("Speedster");
+        ToyRobot r = new ToyRobot("Bolt");
+
+        System.out.println(c.makeSound());
+        System.out.println(r.makeSound());
+        System.out.println(c.getToyId());
+        System.out.println(r.getToyId());
+
+        // Q2
+        PackageBox p = new PackageBox("TRK-88");
+        Invoice i = new Invoice("INV-42");
+
+        System.out.println(p.printLabel());
+        System.out.println(i.printLabel());
+
+        Printable[] items = {p, i};
+        for (Printable x : items)
+            System.out.println(x.printLabel());
+
+        // Q3
+        StringInstrument s = new StringInstrument();
+        Violin v = new Violin();
+
+        System.out.println(s.play());
+        System.out.println(v.play());
+
+        // Q4
+        Blender b = new Blender();
+
+        b.setSpeedLevel(3);
+        System.out.println(b.getSpeedLevel());
+
+        b.setSpeedLevel(9);
+        System.out.println(b.getSpeedLevel());
+
+        System.out.println(b.prepare());
+        System.out.println(b.clean());
+
+        // Q5
+        ParcelNote pn = new ParcelNote("TRK-1");
+        LetterNote ln = new LetterNote("TRK-2");
+
+        System.out.println(pn.confirmDelivery());
+        System.out.println(pn.confirmDelivery("J. Smith"));
+
+        DeliveryNote[] notes = {pn, ln};
+
+        for (DeliveryNote n : notes)
+            System.out.println(n.confirmDelivery());
+    }
+}
