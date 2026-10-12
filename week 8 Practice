@@ -1,0 +1,489 @@
+import java.util.*;
+import java.time.*;
+import java.time.temporal.ChronoUnit;
+
+public class Main {
+
+    public static void main(String[] args) {
+        vehicleDemo();
+        leaveDemo();
+        examDemo();
+        hotelDemo();
+        paymentDemo();
+    }
+
+    // ========== Q1: VEHICLE RENTAL SYSTEM ==========
+
+    static abstract class Vehicle {
+        String name;
+        double rate;
+        boolean available = true;
+
+        Vehicle(String name, double rate) {
+            this.name = name;
+            this.rate = rate;
+        }
+
+        abstract double calculateCharge(int days);
+    }
+
+    static class Sedan extends Vehicle {
+        Sedan(String name) {
+            super(name, 50);
+        }
+
+        double calculateCharge(int days) {
+            return rate * days;
+        }
+    }
+
+    static class SUV extends Vehicle {
+        SUV(String name) {
+            super(name, 80);
+        }
+
+        double calculateCharge(int days) {
+            return rate * days + 100;
+        }
+    }
+
+    static class Customer {
+        String name;
+
+        Customer(String name) {
+            this.name = name;
+        }
+    }
+
+    static void rent(Customer c, Vehicle v, int days) {
+        if (!v.available) {
+            System.out.println(v.name + " is currently unavailable.");
+            return;
+        }
+
+        v.available = false;
+        System.out.println(v.name + " rented by " + c.name);
+        System.out.println("Charge: $" + v.calculateCharge(days));
+    }
+
+    static void returnVehicle(Customer c, Vehicle v) {
+        v.available = true;
+        System.out.println(v.name + " returned by " + c.name);
+    }
+
+    static void vehicleDemo() {
+        System.out.println("\n--- Q1 VEHICLE RENTAL ---");
+        Customer c1 = new Customer("Customer 1");
+        Customer c2 = new Customer("Customer 2");
+        Customer c3 = new Customer("Customer 3");
+
+        Vehicle sedan = new Sedan("Sedan A");
+        Vehicle suv = new SUV("SUV B");
+
+        rent(c1, sedan, 3);
+        rent(c2, sedan, 2);
+        returnVehicle(c1, sedan);
+        rent(c3, suv, 5);
+    }
+
+    // ========== Q2: EMPLOYEE LEAVE WORKFLOW ==========
+
+    enum Status {
+        PENDING, APPROVED, REJECTED
+    }
+
+    static abstract class Employee {
+        String name;
+
+        Employee(String name) {
+            this.name = name;
+        }
+
+        abstract boolean canTakeLeave(int days);
+    }
+
+    static class FullTimeEmployee extends Employee {
+        FullTimeEmployee(String name) {
+            super(name);
+        }
+
+        boolean canTakeLeave(int days) {
+            return days <= 30;
+        }
+    }
+
+    static class PartTimeEmployee extends Employee {
+        PartTimeEmployee(String name) {
+            super(name);
+        }
+
+        boolean canTakeLeave(int days) {
+            return days <= 10;
+        }
+    }
+
+    static class LeaveRequest {
+        Employee employee;
+        int days;
+        private Status status = Status.PENDING;
+
+        LeaveRequest(Employee e, int days) {
+            employee = e;
+            this.days = days;
+        }
+
+        void review(boolean approve) {
+            if (status != Status.PENDING) {
+                System.out.println("Request already reviewed.");
+                return;
+            }
+
+            if (approve && !employee.canTakeLeave(days)) {
+                System.out.println("Leave limit exceeded.");
+                return;
+            }
+
+            status = approve ? Status.APPROVED : Status.REJECTED;
+            System.out.println(employee.name + "'s request: " + status);
+        }
+
+        void changeStatus(Status newStatus) {
+            if (status != Status.PENDING) {
+                System.out.println("Cannot change status from "
+                        + status + " to " + newStatus);
+            } else {
+                status = newStatus;
+            }
+        }
+    }
+
+    static void leaveDemo() {
+        System.out.println("\n--- Q2 LEAVE WORKFLOW ---");
+
+        Employee john = new FullTimeEmployee("John");
+        Employee jane = new PartTimeEmployee("Jane");
+
+        LeaveRequest r1 = new LeaveRequest(john, 5);
+        LeaveRequest r2 = new LeaveRequest(jane, 2);
+
+        System.out.println("John: PENDING");
+        r1.review(true);
+
+        System.out.println("Jane: PENDING");
+        r2.review(false);
+
+        r1.changeStatus(Status.PENDING);
+    }
+
+    // ========== Q3: ONLINE EXAMINATION SYSTEM ==========
+
+    static abstract class Question {
+        String text;
+        int marks;
+
+        Question(String text, int marks) {
+            this.text = text;
+            this.marks = marks;
+        }
+
+        abstract boolean check(String answer);
+    }
+
+    static class MCQ extends Question {
+        String correct;
+
+        MCQ(String text, int marks, String correct) {
+            super(text, marks);
+            this.correct = correct;
+        }
+
+        boolean check(String answer) {
+            return correct.equalsIgnoreCase(answer);
+        }
+    }
+
+    static class TrueFalse extends Question {
+        String correct;
+
+        TrueFalse(String text, int marks, String correct) {
+            super(text, marks);
+            this.correct = correct;
+        }
+
+        boolean check(String answer) {
+            return correct.equalsIgnoreCase(answer);
+        }
+    }
+
+    static class Attempt {
+        List<Question> questions = new ArrayList<>();
+        List<String> answers = new ArrayList<>();
+        boolean submitted = false;
+
+        void addQuestion(Question q) {
+            questions.add(q);
+        }
+
+        void answer(int index, String answer) {
+            if (submitted) {
+                System.out.println("Cannot change submitted answers.");
+                return;
+            }
+
+            while (answers.size() <= index)
+                answers.add("");
+
+            answers.set(index, answer);
+            System.out.println("Answer recorded for Q" + (index + 1));
+        }
+
+        void submit(String student, String exam) {
+            if (submitted) {
+                System.out.println("Already submitted.");
+                return;
+            }
+
+            submitted = true;
+            int score = 0, total = 0;
+
+            System.out.println(exam + " submitted by " + student);
+
+            for (int i = 0; i < questions.size(); i++) {
+                Question q = questions.get(i);
+                total += q.marks;
+
+                boolean correct = i < answers.size()
+                        && q.check(answers.get(i));
+
+                if (correct)
+                    score += q.marks;
+
+                System.out.println("Q" + (i + 1) + ": "
+                        + (correct ? "Correct" : "Incorrect")
+                        + " (" + (correct ? q.marks : 0) + " points)");
+            }
+
+            System.out.println("Total score: " + score + "/" + total);
+        }
+    }
+
+    static void examDemo() {
+        System.out.println("\n--- Q3 ONLINE EXAM ---");
+
+        Attempt a = new Attempt();
+        a.addQuestion(new MCQ("Question 1", 5, "C"));
+        a.addQuestion(new TrueFalse("Question 2", 5, "False"));
+
+        System.out.println("Exam A started by Student 1");
+        a.answer(0, "C");
+        a.answer(1, "True");
+        a.submit("Student 1", "Exam A");
+        a.answer(0, "A");
+    }
+
+    // ========== Q4: HOTEL BOOKING SYSTEM ==========
+
+    static abstract class Room {
+        int number;
+        double rate;
+
+        Room(int number, double rate) {
+            this.number = number;
+            this.rate = rate;
+        }
+
+        abstract double calculatePrice(long days);
+    }
+
+    static class StandardRoom extends Room {
+        StandardRoom(int number) {
+            super(number, 100);
+        }
+
+        double calculatePrice(long days) {
+            return rate * days;
+        }
+    }
+
+    static class DeluxeRoom extends Room {
+        DeluxeRoom(int number) {
+            super(number, 200);
+        }
+
+        double calculatePrice(long days) {
+            return rate * days + 50;
+        }
+    }
+
+    static class Reservation {
+        Room room;
+        String customer;
+        LocalDate start, end, deadline;
+        boolean active = true;
+
+        Reservation(Room room, String customer,
+                    LocalDate start, LocalDate end) {
+            this.room = room;
+            this.customer = customer;
+            this.start = start;
+            this.end = end;
+            deadline = start.minusDays(1);
+        }
+
+        boolean overlaps(LocalDate s, LocalDate e) {
+            return active && s.isBefore(end) && e.isAfter(start);
+        }
+
+        void cancel(LocalDate today) {
+            if (!active)
+                System.out.println("Already cancelled.");
+            else if (!today.isBefore(deadline))
+                System.out.println("Cancellation deadline passed.");
+            else {
+                active = false;
+                System.out.println("Reservation cancelled successfully.");
+            }
+        }
+    }
+
+    static class Hotel {
+        List<Reservation> reservations = new ArrayList<>();
+
+        void book(Room room, String customer,
+                  LocalDate start, LocalDate end) {
+            if (!end.isAfter(start)) {
+                System.out.println("Invalid reservation dates.");
+                return;
+            }
+
+            for (Reservation r : reservations) {
+                if (r.room.number == room.number
+                        && r.overlaps(start, end)) {
+                    System.out.println("Room " + room.number
+                            + " is not available.");
+                    return;
+                }
+            }
+
+            Reservation r = new Reservation(room, customer, start, end);
+            reservations.add(r);
+
+            long days = ChronoUnit.DAYS.between(start, end);
+            System.out.println("Reservation confirmed for " + customer
+                    + ", Room " + room.number);
+            System.out.println("Price: $" + room.calculatePrice(days));
+        }
+    }
+
+    static void hotelDemo() {
+        System.out.println("\n--- Q4 HOTEL BOOKING ---");
+
+        Hotel h = new Hotel();
+        Room r1 = new StandardRoom(101);
+        Room r2 = new DeluxeRoom(201);
+
+        LocalDate start = LocalDate.of(2027, 1, 1);
+        LocalDate end = LocalDate.of(2027, 1, 5);
+
+        h.book(r1, "Customer A", start, end);
+
+        h.book(r1, "Customer B",
+                LocalDate.of(2027, 1, 3),
+                LocalDate.of(2027, 1, 7));
+
+        h.reservations.get(0).cancel(
+                LocalDate.of(2026, 12, 30));
+
+        h.book(r2, "Customer C",
+                LocalDate.of(2027, 2, 10),
+                LocalDate.of(2027, 2, 12));
+    }
+
+    // ========== Q5: PAYMENT PROCESSING SYSTEM ==========
+
+    interface PaymentMethod {
+        boolean processPayment(double amount);
+    }
+
+    static class CreditCardPayment implements PaymentMethod {
+        public boolean processPayment(double amount) {
+            return true;
+        }
+    }
+
+    static class PayPalPayment implements PaymentMethod {
+        public boolean processPayment(double amount) {
+            return false;
+        }
+    }
+
+    static class BankTransferPayment implements PaymentMethod {
+        public boolean processPayment(double amount) {
+            return true;
+        }
+    }
+
+    static class Product {
+        String name;
+        double price;
+
+        Product(String name, double price) {
+            this.name = name;
+            this.price = price;
+        }
+    }
+
+    static class Order {
+        String customer;
+        List<Product> products = new ArrayList<>();
+        private String status = "Pending";
+
+        Order(String customer) {
+            this.customer = customer;
+            System.out.println("Order created for " + customer);
+        }
+
+        void addProduct(Product p) {
+            products.add(p);
+        }
+
+        void pay(PaymentMethod method, String paymentName) {
+            if (products.isEmpty()) {
+                System.out.println("Cannot process payment for an empty order.");
+                return;
+            }
+
+            double total = 0;
+            for (Product p : products)
+                total += p.price;
+
+            System.out.println("Payment initiated via " + paymentName
+                    + " for " + customer);
+
+            if (method.processPayment(total)) {
+                status = "Paid";
+                System.out.println("Payment successful.");
+            } else {
+                System.out.println("Payment failed.");
+            }
+
+            System.out.println("Order status: " + status);
+        }
+    }
+
+    static void paymentDemo() {
+        System.out.println("\n--- Q5 PAYMENT PROCESSING ---");
+
+        Order o1 = new Order("Customer X");
+        o1.addProduct(new Product("Product A", 100));
+        o1.addProduct(new Product("Product B", 200));
+        o1.pay(new CreditCardPayment(), "Credit Card");
+
+        Order o2 = new Order("Customer Y");
+        o2.pay(new CreditCardPayment(), "Credit Card");
+
+        Order o3 = new Order("Customer Z");
+        o3.addProduct(new Product("Product C", 150));
+        o3.pay(new PayPalPayment(), "PayPal");
+    }
+}
