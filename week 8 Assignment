@@ -1,0 +1,515 @@
+
+import java.util.*;
+import java.time.*;
+
+public class Main {
+
+    // ================= QUESTION 1 =================
+    // Hostel Laundry Queue
+
+    interface WashType {
+        int duration();
+        double charge();
+        String name();
+    }
+
+    static class Quick implements WashType {
+        public int duration() { return 30; }
+        public double charge() { return 20; }
+        public String name() { return "Quick"; }
+    }
+
+    static class Normal implements WashType {
+        public int duration() { return 45; }
+        public double charge() { return 30; }
+        public String name() { return "Normal"; }
+    }
+
+    static class Heavy implements WashType {
+        public int duration() { return 60; }
+        public double charge() { return 45; }
+        public String name() { return "Heavy"; }
+    }
+
+    static class Student {
+        String name;
+        Student(String name) { this.name = name; }
+    }
+
+    static class WashCycle {
+        Student student;
+        WashingMachine machine;
+        WashType type;
+
+        WashCycle(Student s, WashingMachine m, WashType t) {
+            student = s;
+            machine = m;
+            type = t;
+        }
+    }
+
+    static class WashingMachine {
+        String id;
+        private WashCycle cycle;
+
+        WashingMachine(String id) { this.id = id; }
+
+        void start(Student s, WashType t) {
+            if (cycle != null) {
+                System.out.println("Machine " + id + " is currently busy.");
+                return;
+            }
+            cycle = new WashCycle(s, this, t);
+            System.out.printf("%s wash started on %s for %s (%d min). Charge: ₹%.2f.%n",
+                    t.name(), id, s.name, t.duration(), t.charge());
+        }
+
+        void complete() {
+            if (cycle == null) {
+                System.out.println(id + " is already free.");
+                return;
+            }
+            System.out.println(id + " cycle completed.");
+            cycle = null;
+            System.out.println(id + " is now free.");
+        }
+    }
+
+    static void question1() {
+        System.out.println("\n--- QUESTION 1: LAUNDRY ---");
+        Student asha = new Student("Asha");
+        Student ravi = new Student("Ravi");
+        Student neha = new Student("Neha");
+
+        WashingMachine m1 = new WashingMachine("M1");
+        WashingMachine m2 = new WashingMachine("M2");
+
+        m1.start(asha, new Quick());
+        m1.start(ravi, new Heavy());
+        m2.start(ravi, new Heavy());
+        m1.complete();
+        m1.start(neha, new Normal());
+    }
+
+    // ================= QUESTION 2 =================
+    // Assignment Submission Portal
+
+    static abstract class Assignment {
+        String title;
+        int maxMarks;
+        LocalDate dueDate;
+
+        Assignment(String title, int max, LocalDate due) {
+            this.title = title;
+            maxMarks = max;
+            dueDate = due;
+        }
+
+        abstract double penaltyPerDay();
+    }
+
+    static class CodingAssignment extends Assignment {
+        CodingAssignment(String t, int m, LocalDate d) {
+            super(t, m, d);
+        }
+        double penaltyPerDay() { return 0.10; }
+    }
+
+    static class WrittenAssignment extends Assignment {
+        WrittenAssignment(String t, int m, LocalDate d) {
+            super(t, m, d);
+        }
+        double penaltyPerDay() { return 0.20; }
+    }
+
+    static class Submission {
+        String student;
+        Assignment assignment;
+        LocalDate submittedDate;
+        private String status = "Submitted";
+
+        Submission(String s, Assignment a, LocalDate date) {
+            student = s;
+            assignment = a;
+            submittedDate = date;
+        }
+
+        void grade(int marks) {
+            if (!status.equals("Submitted")) {
+                System.out.println("Cannot grade: already graded.");
+                return;
+            }
+            if (marks < 0 || marks > assignment.maxMarks) {
+                System.out.println("Invalid marks.");
+                return;
+            }
+
+            long days = Math.max(0,
+                    ChronoUnit.DAYS.between(
+                            assignment.dueDate, submittedDate));
+
+            double finalMarks = marks *
+                    (1 - days * assignment.penaltyPerDay());
+
+            finalMarks = Math.max(0, finalMarks);
+            status = "Graded";
+
+            System.out.printf("%s graded: %.0f/%d",
+                    student, finalMarks, assignment.maxMarks);
+
+            if (days > 0)
+                System.out.printf(" after %.0f%% late penalty",
+                        days * assignment.penaltyPerDay() * 100);
+
+            System.out.println(". Status: " + status + ".");
+        }
+
+        void resubmit() {
+            if (status.equals("Graded"))
+                System.out.println("Cannot resubmit: '" +
+                        assignment.title + "' has already been graded.");
+            else
+                System.out.println("Resubmission allowed.");
+        }
+    }
+
+    static void question2() {
+        System.out.println("\n--- QUESTION 2: ASSIGNMENTS ---");
+
+        LocalDate mar10 = LocalDate.of(2026, 3, 10);
+        LocalDate mar12 = LocalDate.of(2026, 3, 12);
+        LocalDate mar14 = LocalDate.of(2026, 3, 14);
+
+        Assignment coding =
+                new CodingAssignment("Linked List Lab", 50, mar10);
+        Assignment written =
+                new WrittenAssignment("Design Essay", 50, mar12);
+
+        Submission a = new Submission("Asha", coding, mar10);
+        Submission r = new Submission("Ravi", written, mar14);
+
+        System.out.println("Asha's submission for '" +
+                coding.title + "' received (on time). Status: Submitted.");
+        System.out.println("Ravi's submission for '" +
+                written.title + "' received (2 days late). Status: Submitted.");
+
+        a.grade(45);
+        r.grade(40);
+        a.resubmit();
+    }
+
+    // ================= QUESTION 3 =================
+    // Campus Premiere Ticket Counter
+
+    static abstract class Seat {
+        String id;
+        Seat(String id) { this.id = id; }
+        abstract double getPrice();
+    }
+
+    static class Regular extends Seat {
+        Regular(String id) { super(id); }
+        double getPrice() { return 150; }
+    }
+
+    static class Premium extends Seat {
+        Premium(String id) { super(id); }
+        double getPrice() { return 250; }
+    }
+
+    static class Recliner extends Seat {
+        Recliner(String id) { super(id); }
+        double getPrice() { return 400; }
+    }
+
+    static class Show {
+        String time;
+        Map<String, Booking> booked = new HashMap<>();
+        Show(String time) { this.time = time; }
+    }
+
+    static class Booking {
+        String customer;
+        Show show;
+        List<Seat> seats;
+        boolean cancelled = false;
+
+        Booking(String c, Show s, List<Seat> seats) {
+            customer = c;
+            show = s;
+            this.seats = new ArrayList<>(seats);
+        }
+
+        double total() {
+            double sum = 0;
+            for (Seat s : seats) sum += s.getPrice();
+            return sum;
+        }
+
+        void cancel(boolean showStarted) {
+            if (cancelled) {
+                System.out.println("Booking already cancelled.");
+                return;
+            }
+            if (showStarted) {
+                System.out.println("Cannot cancel after show starts.");
+                return;
+            }
+
+            for (Seat s : seats) show.booked.remove(s.id);
+            cancelled = true;
+            System.out.println(customer + "'s booking cancelled. Seats " +
+                    seatNames(seats) + " released.");
+        }
+    }
+
+    static String seatNames(List<Seat> seats) {
+        List<String> names = new ArrayList<>();
+        for (Seat s : seats) names.add(s.id);
+        return String.join(", ", names);
+    }
+
+    static Booking book(String customer, Show show, Seat... seats) {
+        if (seats.length < 1 || seats.length > 6) {
+            System.out.println("Booking must contain 1 to 6 seats.");
+            return null;
+        }
+
+        Set<String> ids = new HashSet<>();
+        for (Seat s : seats) {
+            if (!ids.add(s.id)) {
+                System.out.println("Duplicate seat in booking: " + s.id);
+                return null;
+            }
+            if (show.booked.containsKey(s.id)) {
+                System.out.println("Seat " + s.id +
+                        " is already booked for this show.");
+                return null;
+            }
+        }
+
+        Booking b = new Booking(customer, show, Arrays.asList(seats));
+        for (Seat s : seats) show.booked.put(s.id, b);
+
+        System.out.printf("Booking confirmed for %s: %s. Total: ₹%.2f.%n",
+                customer, seatNames(b.seats), b.total());
+        return b;
+    }
+
+    static void question3() {
+        System.out.println("\n--- QUESTION 3: TICKETS ---");
+
+        Show show = new Show("7 PM");
+
+        Booking asha = book("Asha", show,
+                new Regular("A1"), new Regular("A2"),
+                new Premium("F5"));
+
+        book("Ravi", show, new Regular("A2"));
+        book("Ravi", show, new Recliner("R1"));
+
+        if (asha != null) asha.cancel(false);
+
+        book("Neha", show, new Regular("A2"));
+    }
+
+    // ================= QUESTION 4 =================
+    // FitZone Membership Desk
+
+    interface MembershipPlan {
+        int months();
+        double discount();
+        String name();
+
+        default double calculateFee() {
+            return 1000.0 * months() * (1 - discount());
+        }
+    }
+
+    static class Monthly implements MembershipPlan {
+        public int months() { return 1; }
+        public double discount() { return 0; }
+        public String name() { return "Monthly"; }
+    }
+
+    static class Quarterly implements MembershipPlan {
+        public int months() { return 3; }
+        public double discount() { return 0.10; }
+        public String name() { return "Quarterly"; }
+    }
+
+    static class Annual implements MembershipPlan {
+        public int months() { return 12; }
+        public double discount() { return 0.25; }
+        public String name() { return "Annual"; }
+    }
+
+    static class Membership {
+        String member;
+        MembershipPlan plan;
+        private String status = "Active";
+
+        Membership(String member, MembershipPlan plan) {
+            this.member = member;
+            this.plan = plan;
+            System.out.printf("%s membership created for %s. Fee: ₹%.2f. Status: %s.%n",
+                    plan.name(), member, plan.calculateFee(), status);
+        }
+
+        void checkIn() {
+            if (status.equals("Active"))
+                System.out.println(member + " checked in successfully.");
+            else
+                System.out.println("Check-in denied: " + member +
+                        "'s membership is " + status + ".");
+        }
+
+        void freeze() {
+            if (!status.equals("Active")) {
+                System.out.println("Cannot freeze a " + status + " membership.");
+                return;
+            }
+            status = "Frozen";
+            System.out.println(member + "'s membership frozen. Status: " + status + ".");
+        }
+
+        void unfreeze() {
+            if (!status.equals("Frozen")) {
+                System.out.println("Cannot unfreeze a " + status + " membership.");
+                return;
+            }
+            status = "Active";
+            System.out.println(member + "'s membership unfrozen. Status: " + status + ".");
+        }
+
+        void expire() {
+            if (status.equals("Expired")) return;
+            status = "Expired";
+            System.out.println(member + "'s membership expired. Status: " + status + ".");
+        }
+    }
+
+    static void question4() {
+        System.out.println("\n--- QUESTION 4: GYM ---");
+
+        Membership asha = new Membership("Asha", new Quarterly());
+        Membership ravi = new Membership("Ravi", new Monthly());
+
+        asha.checkIn();
+        asha.freeze();
+        asha.checkIn();
+
+        ravi.expire();
+        ravi.freeze();
+    }
+
+    // ================= QUESTION 5 =================
+    // Campus Notice Broadcaster
+
+    interface NotificationChannel {
+        void send(String student, String title);
+    }
+
+    static class EmailChannel implements NotificationChannel {
+        public void send(String student, String title) {
+            System.out.println("[Email → " + student + "] " + title);
+        }
+    }
+
+    static class SmsChannel implements NotificationChannel {
+        public void send(String student, String title) {
+            System.out.println("[SMS → " + student + "] " + title);
+        }
+    }
+
+    static class AppChannel implements NotificationChannel {
+        public void send(String student, String title) {
+            System.out.println("[App → " + student + "] " + title);
+        }
+    }
+
+    static class NoticeStudent {
+        String name, department;
+        List<NotificationChannel> channels = new ArrayList<>();
+
+        NoticeStudent(String n, String d) {
+            name = n;
+            department = d;
+        }
+
+        void addChannel(NotificationChannel c) {
+            channels.add(c);
+        }
+    }
+
+    static class Notice {
+        String title;
+        Set<String> departments;
+
+        Notice(String title, String... departments) {
+            this.title = title;
+            this.departments = new HashSet<>(Arrays.asList(departments));
+        }
+
+        boolean isValid() {
+            return title != null && !title.trim().isEmpty()
+                    && !departments.isEmpty()
+                    && !departments.contains("");
+        }
+    }
+
+    static class NoticeBoard {
+        List<NoticeStudent> students = new ArrayList<>();
+
+        void addStudent(NoticeStudent s) {
+            students.add(s);
+        }
+
+        void post(Notice n) {
+            if (!n.isValid()) {
+                System.out.println("Cannot post notice: At least one target department is required.");
+                return;
+            }
+
+            System.out.println("Notice '" + n.title +
+                    "' posted to " + String.join(", ", n.departments) + ".");
+
+            for (NoticeStudent s : students) {
+                if (n.departments.contains(s.department)) {
+                    for (NotificationChannel c : s.channels)
+                        c.send(s.name, n.title);
+                }
+            }
+        }
+    }
+
+    static void question5() {
+        System.out.println("\n--- QUESTION 5: NOTICES ---");
+
+        NoticeBoard board = new NoticeBoard();
+
+        NoticeStudent asha = new NoticeStudent("Asha", "CSE");
+        asha.addChannel(new EmailChannel());
+        asha.addChannel(new AppChannel());
+
+        NoticeStudent ravi = new NoticeStudent("Ravi", "ECE");
+        ravi.addChannel(new SmsChannel());
+
+        board.addStudent(asha);
+        board.addStudent(ravi);
+
+        board.post(new Notice("Lab Closed Tomorrow", "CSE"));
+        board.post(new Notice("Fee Deadline Extended", "CSE", "ECE"));
+        board.post(new Notice("Sports Day"));
+    }
+
+    // ================= MAIN METHOD =================
+
+    public static void main(String[] args) {
+        question1();
+        question2();
+        question3();
+        question4();
+        question5();
+    }
+}
