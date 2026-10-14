@@ -1,0 +1,246 @@
+import java.util.*;
+
+public class CodingAssignment {
+
+    // ============================================================
+    // Problem 1: Class Topper Finder
+    // ============================================================
+    // Time Complexity:  O(m * n) — each student × each subject visited once
+    // Space Complexity: O(1)     — only a few tracking variables
+    // ============================================================
+
+    /**
+     * marks: 2D array where rows = students, columns = subjects
+     * Returns an int[] of size 2: {rowIndex, total}
+     * Ties broken by smallest row index (strictly greater comparison).
+     */
+    public static int[] findTopper(int[][] marks) {
+        int bestRow = 0;
+        int bestTotal = -1;
+
+        for (int r = 0; r < marks.length; r++) {
+            int total = 0;
+            for (int c = 0; c < marks[r].length; c++) {
+                total += marks[r][c];
+            }
+            // Strictly greater -> keeps earliest row on tie
+            if (total > bestTotal) {
+                bestTotal = total;
+                bestRow = r;
+            }
+        }
+
+        return new int[]{bestRow, bestTotal};
+    }
+
+
+    // ============================================================
+    // Problem 2: Merging Two Token Queues
+    // ============================================================
+    // Time Complexity:  O(m + n) — each element copied exactly once
+    // Space Complexity: O(m + n) — result array holds all elements
+    //
+    // Compare with sort-after-join:
+    //   Time:  O((m + n) log(m + n))
+    //   Space: O(m + n) (plus sort overhead)
+    // Merge is strictly better since inputs are already sorted.
+    // ============================================================
+
+    public static int[] mergeTokens(int[] counterA, int[] counterB) {
+        int m = counterA.length;
+        int n = counterB.length;
+        int[] result = new int[m + n];
+
+        int i = 0, j = 0, k = 0;
+
+        // Compare front elements, copy the smaller
+        while (i < m && j < n) {
+            if (counterA[i] <= counterB[j]) {
+                result[k++] = counterA[i++];
+            } else {
+                result[k++] = counterB[j++];
+            }
+        }
+
+        // Copy remaining elements
+        while (i < m) {
+            result[k++] = counterA[i++];
+        }
+        while (j < n) {
+            result[k++] = counterB[j++];
+        }
+
+        return result;
+    }
+
+
+    // ============================================================
+    // Problem 3: Most Popular Canteen Order
+    // ============================================================
+    // Approach: One pass to build a HashMap count, then a second
+    // pass over the original order to pick the first item achieving
+    // the maximum count (correct tie-breaking).
+    //
+    // Time Complexity:  O(n) — two linear scans, O(1) map ops
+    // Space Complexity: O(u) — u = number of unique items
+    //
+    // Compare with rescan-for-each-item approach:
+    //   Time:  O(n * u) or worse  -> O(n^2) in the worst case
+    //   Space: O(1)
+    // ============================================================
+
+    /**
+     * orders: list of item name strings
+     * Returns a String[] of size 2: {item, countAsString}
+     * (Java lacks tuples; using String[] for convenience.)
+     */
+    public static String[] mostPopular(String[] orders) {
+        Map<String, Integer> counts = new HashMap<>();
+
+        // First pass: count each item
+        for (String item : orders) {
+            counts.put(item, counts.getOrDefault(item, 0) + 1);
+        }
+
+        // Find the maximum count
+        int maxCount = 0;
+        for (int c : counts.values()) {
+            if (c > maxCount) {
+                maxCount = c;
+            }
+        }
+
+        // Second pass: first item in original order achieving maxCount
+        for (String item : orders) {
+            if (counts.get(item) == maxCount) {
+                return new String[]{item, String.valueOf(maxCount)};
+            }
+        }
+
+        // Should never reach here for non-empty input
+        return new String[]{"", "0"};
+    }
+
+
+    // ============================================================
+    // Problem 4: Hot Weather Alert Windows
+    // ============================================================
+    // Sliding-window sum:
+    //   Time Complexity:  O(n) — each element added/removed once
+    //   Space Complexity: O(1) — only a running sum and counter
+    //
+    // Recomputing each block from scratch:
+    //   Time:  O(n * k)
+    //
+    // Avoids floating-point division by comparing:
+    //   sum >= k * threshold
+    // ============================================================
+
+    public static int countAlerts(int[] readings, int k, int threshold) {
+        int n = readings.length;
+        if (k > n || k <= 0) return 0;
+
+        long requiredSum = (long) k * threshold;
+        long windowSum = 0;
+        int alerts = 0;
+
+        // Build first window
+        for (int i = 0; i < k; i++) {
+            windowSum += readings[i];
+        }
+        if (windowSum >= requiredSum) alerts++;
+
+        // Slide the window forward
+        for (int i = k; i < n; i++) {
+            windowSum += readings[i];       // add new reading
+            windowSum -= readings[i - k];   // remove outgoing reading
+            if (windowSum >= requiredSum) alerts++;
+        }
+
+        return alerts;
+    }
+
+
+    // ============================================================
+    // Problem 5: Ticket Price Slot Finder
+    // ============================================================
+    // Binary search:
+    //   Time Complexity:  O(log n)
+    //   Space Complexity: O(1)
+    //
+    // Linear scan:
+    //   Time:  O(n)
+    //   Space: O(1)
+    // ============================================================
+
+    /**
+     * prices: sorted ascending, distinct integers
+     * newPrice: integer to find or insert
+     * Returns index where newPrice exists, or where it should be inserted.
+     */
+    public static int findSlot(int[] prices, int newPrice) {
+        int low = 0;
+        int high = prices.length; // exclusive upper bound allows insert at end
+
+        while (low < high) {
+            int mid = low + (high - low) / 2;
+            if (prices[mid] < newPrice) {
+                low = mid + 1;
+            } else {
+                high = mid;
+            }
+        }
+
+        // 'low' is now the first index with prices[low] >= newPrice,
+        // which is exactly the existing index or the insertion point.
+        return low;
+    }
+
+
+    // ============================================================
+    // Main method: Quick self-test / demo
+    // ============================================================
+    public static void main(String[] args) {
+        // Problem 1
+        int[][] marks = {
+            {78, 85, 90},
+            {88, 92, 79},
+            {65, 70, 95}
+        };
+        int[] topper = findTopper(marks);
+        System.out.println("Topper: (" + topper[0] + ", " + topper[1] + ")");
+        // Expected: (1, 259)
+
+        // Problem 2
+        int[] a = {3, 8, 15, 20};
+        int[] b = {5, 8, 12};
+        System.out.println("Merged: " + Arrays.toString(mergeTokens(a, b)));
+        // Expected: [3, 5, 8, 8, 12, 15, 20]
+
+        System.out.println("Merged (empty A): " +
+            Arrays.toString(mergeTokens(new int[]{}, new int[]{4, 9})));
+        // Expected: [4, 9]
+
+        // Problem 3
+        String[] orders1 = {"dosa", "idli", "vada", "dosa", "idli", "dosa", "tea"};
+        String[] result1 = mostPopular(orders1);
+        System.out.println("Most popular: (" + result1[0] + ", " + result1[1] + ")");
+        // Expected: (dosa, 3)
+
+        String[] orders2 = {"tea", "coffee", "coffee", "tea"};
+        String[] result2 = mostPopular(orders2);
+        System.out.println("Most popular: (" + result2[0] + ", " + result2[1] + ")");
+        // Expected: (tea, 2)
+
+        // Problem 4
+        int[] readings = {2, 2, 2, 2, 5, 5, 5, 8};
+        System.out.println("Alerts: " + countAlerts(readings, 3, 4));
+        // Expected: 3
+
+        // Problem 5
+        int[] prices = {120, 150, 200, 260};
+        System.out.println("Slot for 150: " + findSlot(prices, 150)); // 1
+        System.out.println("Slot for 210: " + findSlot(prices, 210)); // 3
+        System.out.println("Slot for 300: " + findSlot(prices, 300)); // 4
+    }
+}
