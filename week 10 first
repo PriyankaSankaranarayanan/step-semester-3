@@ -1,0 +1,107 @@
+class Node {
+    int data;
+    Node next;
+
+    public Node(int data) {
+        this.data = data;
+        this.next = null;
+    }
+}
+
+public class PriorityTokenList {
+    private Node head;
+    private int size;
+
+    public PriorityTokenList() {
+        this.head = null;
+        this.size = 0;
+    }
+
+    // 1. Add at the front (Priority)
+    public void addFirst(int token) {
+        Node newNode = new Node(token);
+        newNode.next = head;
+        head = newNode;
+        size++;
+    }
+
+    // 2. Add at the end (Normal)
+    public void addLast(int token) {
+        Node newNode = new Node(token);
+        
+        if (head == null) {
+            head = newNode;
+        } else {
+            Node current = head;
+            while (current.next != null) {
+                current = current.next;
+            }
+            current.next = newNode;
+        }
+        size++;
+    }
+
+    // 3. Insert at a given position (Rescheduled)
+    public void insertAt(int index, int token) {
+        // Constraint: 0 <= index <= current size
+        if (index < 0 || index > size) {
+            throw new IndexOutOfBoundsException("Invalid index: " + index);
+        }
+
+        if (index == 0) {
+            addFirst(token);
+            return;
+        }
+
+        if (index == size) {
+            addLast(token);
+            return;
+        }
+
+        Node newNode = new Node(token);
+        Node current = head;
+
+        // Traverse to the node just before the target index
+        // We stop at index - 1 to insert AFTER it
+        for (int i = 0; i < index - 1; i++) {
+            current = current.next;
+        }
+
+        // Insert the new node
+        newNode.next = current.next;
+        current.next = newNode;
+        size++;
+    }
+
+    // Helper method to print the list
+    public void printList() {
+        Node current = head;
+        while (current != null) {
+            System.out.print(current.data + " -> ");
+            current = current.next;
+        }
+        System.out.println("null");
+    }
+
+    // Main method to test the example
+    public static void main(String[] args) {
+        PriorityTokenList list = new PriorityTokenList();
+        
+        // Initializing the starting list: 101 -> 102 -> 103
+        list.addLast(101);
+        list.addLast(102);
+        list.addLast(103);
+        
+        System.out.print("Start: ");
+        list.printList();
+
+        // Performing operations
+        list.addFirst(100);
+        list.addLast(104);
+        list.insertAt(2, 150);
+
+        // Expected Output: 100 -> 101 -> 150 -> 102 -> 103 -> 104 -> null
+        System.out.print("Output: ");
+        list.printList();
+    }
+}
