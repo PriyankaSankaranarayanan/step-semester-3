@@ -1,0 +1,33 @@
+class Node {
+    int data;
+    Node next;
+
+    Node(int data) {
+        this.data = data;
+        this.next = null;
+    }
+}
+
+public class Solution {
+    public Node removeAll(Node head, int code) {
+        // Handle empty list
+        if (head == null) return null;
+
+        // 1. Remove matching nodes from the front
+        while (head != null && head.data == code) {
+            head = head.next;
+        }
+
+        // 2. Walk with a previous reference and skip matching nodes
+        Node current = head;
+        while (current != null && current.next != null) {
+            if (current.next.data == code) {
+                current.next = current.next.next; // Skip the node
+            } else {
+                current = current.next; // Move forward
+            }
+        }
+
+        return head;
+    }
+}
