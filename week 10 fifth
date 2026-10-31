@@ -1,0 +1,56 @@
+import java.util.*;
+
+class Main {
+
+    static class Node {
+        String name;
+        Node next;
+
+        Node(String name) {
+            this.name = name;
+        }
+    }
+
+    static Node tail = null;
+
+    // Add player at the end
+    static void addLast(String name) {
+        Node newNode = new Node(name);
+
+        if (tail == null) {
+            tail = newNode;
+            tail.next = tail;
+        } else {
+            newNode.next = tail.next;
+            tail.next = newNode;
+            tail = newNode;
+        }
+    }
+
+    // Print players for given turns
+    static void printTurns(int turns) {
+        if (tail == null)
+            return;
+
+        Node current = tail.next;
+
+        for (int i = 0; i < turns; i++) {
+            System.out.print(current.name + " ");
+            current = current.next;
+        }
+    }
+
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+
+        int n = sc.nextInt();
+
+        for (int i = 0; i < n; i++) {
+            addLast(sc.next());
+        }
+
+        int turns = sc.nextInt();
+
+        printTurns(turns);
+    }
+}
